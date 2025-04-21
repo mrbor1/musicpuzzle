@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stage 1: Warm-Up Puzzle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>🧩 Stage 1: Warm-Up Puzzle</h1>
+    <p>This will be a warm-up puzzle... mwahahaha 😈</p>
+
+    <p id="randomDescription"></p>
+    <input type="text" id="userAnswer" placeholder="Type your answer here..." />
+    <button id="submitBtn">Submit</button>
+
+    <p id="resultMsg"></p>
+
+    <div id="nextStage" style="display: none;">
+      <h2>🎉 Congratulation!!! 🎉</h2>
+      <button id="nextStageBtn">Ready for Stage 2?</button>
+    </div>
+  </div>
+
+  <script>
+    const answerKey = {
+      "A": "PIANO",
+      "B": "ORGAN",
+      "C": "DRUM",
+      "D": "FLUTE"
+    };
+
+    // Randomize envelope description
+    const envelopes = ["A", "B", "C", "D"];
+    const randomEnvelope = envelopes[Math.floor(Math.random() * envelopes.length)];
+
+    const randomDescription = `Look at envelope ${randomEnvelope}`;
+    document.getElementById("randomDescription").textContent = randomDescription;
+
+    const submitBtn = document.getElementById("submitBtn");
+    const resultMsg = document.getElementById("resultMsg");
+    const nextStage = document.getElementById("nextStage");
+    const nextStageBtn = document.getElementById("nextStageBtn");
+
+    submitBtn.addEventListener("click", () => {
+      const input = document.getElementById("userAnswer").value.trim().toUpperCase();
+
+      if (input === answerKey[randomEnvelope]) {
+        resultMsg.textContent = "✅ Correct! You've unlocked the next puzzle!";
+        resultMsg.style.color = "green";
+        nextStage.style.display = "block"; // Show "Ready for Stage 2" button
+        submitBtn.style.display = "none"; // Hide submit button after correct answer
+      } else {
+        resultMsg.textContent = "❌ Incorrect. Try again!";
+        resultMsg.style.color = "red";
+      }
+    });
+
+    nextStageBtn.addEventListener("click", () => {
+      window.location.href = "stage2.html"; // Redirect to Stage 2
+    });
+  </script>
+</body>
+</html>

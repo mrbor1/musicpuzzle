@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to Music Puzzle!</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <div class="container">
+    <h1>🎵 Welcome to Music Puzzle! 🎵</h1>
+    <p>You will earn tokens getting through all the stages of the puzzle.<br>
+    You must be in a group of 2 - 5 people.</p>
+    <button id="startBtn">Press me if you are ready</button>
+  </div>
+
+  <audio id="bgMusic" loop>
+    <source src="audio/bg-music.mp3" type="audio/mpeg">
+    Your browser does not support the audio tag.
+  </audio>
+
+  <script src="script.js"></script>
+  <script>
+    // Start Button Functionality
+    document.getElementById('startBtn').addEventListener('click', function() {
+      // Play background music if not already playing
+      document.getElementById('bgMusic').play();
+
+      // Redirect to Stage 1 after clicking the button
+      window.location.href = "stage1.html";
+    });
+  </script>
+</body>
+</html>

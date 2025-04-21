@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stage 2: Xylophone Puzzle</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/pitchy@2.1.1/dist/pitchy.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    let audioContext;
+    let analyser;
+    let microphone;
+    let dataArray;
+    let bufferLength;
+    let userSequence = [];
+    const correctSequence = ["B", "A", "G"];
+    function detectNote(frequency) {
+  const noteList = [
+    { note: "C", freq: 261.63 },
+    { note: "C#", freq: 277.18 },
+    { note: "D", freq: 293.66 },
+    { note: "D#", freq: 311.13 },
+    { note: "E", freq: 329.63 },
+    { note: "F", freq: 349.23 },
+    { note: "F#", freq: 369.99 },
+    { note: "G", freq: 392.00 },
+    { note: "G#", freq: 415.30 },
+    { note: "A", freq: 440.00 },
+    { note: "A#", freq: 466.16 },
+    { note: "B", freq: 493.88 },
+    { note: "C5", freq: 523.25 }
+  ];
+  let closestNote = null;
+  let minDiff = Infinity;
+
+  for (let i = 0; i < noteList.length; i++) {
+    let diff = Math.abs(frequency - noteList[i].freq);
+    if (diff < minDiff) {
+      minDiff = diff;
+      closestNote = noteList[i].note;
+    }
+  }
+
+  return closestNote;
+}
+
+  
+    function setupMicrophone() {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 2048;
+      bufferLength = analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+  
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          microphone = audioContext.createMediaStreamSource(stream);
+          microphone.connect(analyser);
+        })
+        .catch(function(err) {
+          alert("Microphone access denied or unavailable.");
+        });
+    }
+  
+    function listenToMicrophone() {
+      analyser.getByteFrequencyData(dataArray);
+      const peakFrequency = getPeakFrequency();
+      const note = detectNote(peakFrequency);
+  
+      if (note) {
+        document.getElementById("detectedNote").textContent = "Detected Note: " + note;
+        userSequence.push(note);
+        checkSequence();
+      }
+  
+      requestAnimationFrame(listenToMicrophone);
+    }
+  
+    function getPeakFrequency() {
+      let max = -1;
+      let index = -1;
+  
+      for (let i = 0; i < bufferLength; i++) {
+        if (dataArray[i] > max) {
+          max = dataArray[i];
+          index = i;
+        }
+      }
+  
+      const nyquist = audioContext.sampleRate / 2;
+      const frequency = index * nyquist / bufferLength;
+      return frequency;
+    }
+  
+    function detectNote(frequency) {
+      for (let note in noteFrequencies) {
+        if (Math.abs(frequency - noteFrequencies[note]) < 5) {
+          return note;
+        }
+      }
+      return null;
+    }
+  
+    function checkSequence() {
+  const filtered = userSequence.filter(n => correctSequence.includes(n));
+  if (filtered.length >= correctSequence.length) {
+    const lastThree = filtered.slice(-3);
+    if (JSON.stringify(lastThree) === JSON.stringify(correctSequence)) {
+      document.getElementById("feedbackMsg").textContent = "✅ Correct! You've unlocked the next stage!";
+      document.getElementById("feedbackMsg").style.color = "green";
+      document.getElementById("nextStage").style.display = "block";
+      document.getElementById("xylophone").style.display = "none";
+    } else {
+      document.getElementById("feedbackMsg").textContent = "❌ Incorrect. Try again!";
+      document.getElementById("feedbackMsg").style.color = "red";
+      userSequence = []; // Reset only when the filtered input reaches length 3
+    }
+  }
+}
+    document.addEventListener("DOMContentLoaded", function() {
+      document.getElementById("startListeningBtn").addEventListener("click", function() {
+        this.textContent = "Listening...";
+        setupMicrophone();
+        listenToMicrophone();
+      });
+  
+      document.getElementById("nextStageBtn")?.addEventListener("click", function() {
+        window.location.href = "final-stage.html";
+      });
+    });
+  </script>
+  
+</head>
+<body>
+  <div class="container">
+    <h1>🎉 Stage 2: Xylophone Puzzle! 🎉</h1>
+    <p>Look at the clue below. Play the xylophone to solve the puzzle.</p>
+    
+    <!-- School bag image as the clue -->
+    <img src="images/school-bag.png" alt="School Bag" style="max-width: 100%;">
+
+    <p><strong>Clue:</strong> Play the xylophone (play the notes you think match the clue).</p>
+    
+    <!-- Button to start listening -->
+    <button id="startListeningBtn">Press to Listen</button>
+    
+    <!-- Display detected note -->
+    <p id="detectedNote">Detected Note: None</p>
+
+    <!-- Feedback for the user -->
+    <p id="feedbackMsg"></p>
+    
+
+    <!-- Message after completing the puzzle -->
+    <div id="nextStage" style="display: none;">
+      <h2>🎉 Congratulation!!! 🎉</h2>
+      <button id="nextStageBtn">Ready for the Final Stage?</button>
+    </div>
+  </div>
+</body>
+</html>
